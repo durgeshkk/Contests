@@ -1,0 +1,90 @@
+name: C/C++ CI Build
+
+on:
+  push:
+    paths:
+      - 2024_03_06_Practice/**
+    branches: 
+      - main
+      - develop
+  pull_request: 
+    branches: 
+      - main
+      - develop
+  workflow_dispatch:
+
+jobs:
+  Build:
+    name: Leetcode Build Check
+    runs-on: ubuntu-latest
+
+    outputs: # will be accessible to all the steps within this Job
+      COMPILATION_FAILURES: ${{ steps.set-failures.outputs.compilation_failures }} # This output var is set to {id} step's compilation_failure output/steps.{id}.outputs.{var_name}
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: ${{ github.repository }} is cloned to the Runner
+      run: echo "The ${{ github.repository }} repository has been cloned to the runner."
+
+    - name: List files in the repository
+      run: | 
+        ls ${{ github.workspace }}
+
+    - name: Create a Folder to store all the cpp Files compiled Results
+      run: |
+        mkdir compiled_outputs
+        cd 2024_03_06_With_Workflow
+        pwd
+        ls
+
+    - name: Find and Compile C++ files
+      id: set-failures
+      # Get the list of all cpp files and store it in 'files'
+      # Iterate files & compile all of them one by one & if compilation fails, prints an error mssg & 
+      # appends file path to end of 'compilation_failures'
+      # ::set-output name=OUTPUT_NAME::OUTPUT_VALUE
+      # echo "{COMPILATION_FAILURES}={$compilation_failures}"
+      run: |
+        pwd
+        cd 2024_03_06_Practice
+        pwd
+        FLAG=0
+        files=$(find -name "*.${{ env.file_extention }}")
+        for file in $files; do
+          if ! g++ -c "$file"; then
+            echo "Compilation failed for $file"
+            compilation_failures="$compilation_failures $file"
+            FLAG=1
+          fi
+        done
+        echo "::set-output name=COMPILATION_FAILURES::$compilation_failures"
+        ls
+        if [ "$FLAG" == "1" ]; then
+          exit 1
+        fi
+      env:
+        file_extention: cpp
+
+    - name: Display Compilation Failures
+      if: failure()
+      run: |
+        echo "Compilation failures: ${{ steps.set-failures.outputs.compilation_failures }}"  
+
+    - name: Raise issue on compilation failure
+      if: failure()
+      uses: dacbd/create-issue-action@main
+      with:
+        token: ${{ github.token }}
+        title: Compilation in few Files failed!
+        body: |
+          ### Context
+          [Failed Run](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
+          [Codebase](https://github.com/${{ github.repository }}/tree/${{ github.sha }})
+          Workflow name - `${{ github.workflow }}`
+          Job -           `${{ github.job }}`
+          status -        `${{ job.status }}`
+          Step - `${{ steps.set-failures.outputs.compilation_failures }}`
+        assignees: durgeshkk
+    
