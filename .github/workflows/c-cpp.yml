@@ -72,19 +72,19 @@ jobs:
       run: |
         echo "Compilation failures: ${{ steps.set-failures.outputs.compilation_failures }}"  
 
-    - name: Raise issue on compilation failure
-      if: failure()
-      uses: dacbd/create-issue-action@main
-      with:
-        token: ${{ github.token }}
-        title: Compilation in few Files failed!
-        body: |
-          ### Context
-          [Failed Run](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
-          [Codebase](https://github.com/${{ github.repository }}/tree/${{ github.sha }})
-          Workflow name - `${{ github.workflow }}`
-          Job -           `${{ github.job }}`
-          status -        `${{ job.status }}`
-          Step - `${{ steps.set-failures.outputs.compilation_failures }}`
-        assignees: durgeshkk
+    # - name: Raise issue on compilation failure
+    #   if: failure()
+    #   uses: dacbd/create-issue-action@main
+    #   with:
+    #     token: ${{ github.token }}
+    #     title: Compilation in few Files failed!
+    #     body: |
+    #       ### Context
+    #       [Failed Run](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
+    #       [Codebase](https://github.com/${{ github.repository }}/tree/${{ github.sha }})
+    #       Workflow name - `${{ github.workflow }}`
+    #       Job -           `${{ github.job }}`
+    #       status -        `${{ job.status }}`
+    #       Step - `${{ steps.set-failures.outputs.compilation_failures }}`
+    #     assignees: durgeshkk
     
