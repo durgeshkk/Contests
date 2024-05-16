@@ -15,7 +15,7 @@ on:
 
 jobs:
   Build:
-    name: Leetcode Build Check
+    name: Codeforces Build Check
     runs-on: ubuntu-latest
 
     outputs: # will be accessible to all the steps within this Job
@@ -35,7 +35,7 @@ jobs:
     - name: Create a Folder to store all the cpp Files compiled Results
       run: |
         mkdir compiled_outputs
-        cd 2024_03_06_With_Workflow
+        cd 2024_03_06_Practice
         pwd
         ls
 
