@@ -97,94 +97,50 @@ long long lcm(long long a, long long b) {
     return a / __gcd(a, b) * b;
 }
 
+ll ans;
+set<ll> s;
+vector<ll> v;
+void check(ll possible_lcm){
+    if(s.find(possible_lcm) != s.end()){return;}
 
-
-map<ll,ll> mp;
-map<ll,set<ll>> dependency;
-map<ll,ll> dp;
-ll dfs(ll ele){
-    if(dependency[ele].size() == 0){
-        return dp[ele] = mp[ele];
+    ll cntr = 0,current_lcm = 1;
+    for(auto it:v){
+        if(possible_lcm%it == 0){
+            current_lcm = lcm(current_lcm,it);
+            ++cntr;
+        }
     }
 
-    if(dp.find(ele) != dp.end()){
-        return dp[ele];
-    }
-
-    ll sa = 2001,sa2 = 0;
-    for(auto it:dependency[ele]){
-        sa = min(dfs(it),sa);
-    }
-    return dp[ele] = sa+mp[ele];
-}
-
-ll recur(ll ele2,set<ll> &vis){
-    vis.insert(ele2);
-    for(auto it:dependency[ele2]){
-        recur(it,vis);
+    if(current_lcm == possible_lcm){
+        ans = max(ans,cntr);
     }
 }
 
 void solve(){
-    mp.clear();dependency.clear();dp.clear();
+    s.clear();v.clear();ans = 0;
     ll n;cin>>n;
-    vector<ll> v(n);enter(v);
+    v.assign(n,0);enter(v);
     sort(all(v));
-    
-    for(auto it:v){
-        mp[it]++;
-    }
-    
-    set<ll> s(all(v));
-    if(s.find(1) != s.end()){
-        s.erase(s.find(1));
-    }
 
-    vector<ll> tmp(all(s));
-    
-    for(ll i = 0;i<tmp.size();++i){
-        set<ll> vis;
-        for(ll j = i-1;j>=0;--j){
-            if(vis.find(tmp[j]) != vis.end()){continue;}
-            ll ele = tmp[i],ele2 = tmp[j];
-            if(lcm(ele,ele2) == ele){
-                dependency[ele].insert(ele2);
-                recur(ele2,vis);
-            }
-        }
-    }
-
-    // for(auto it:dependency){
-    //     cout<<it.first<< " -> ";
-    //     show(it.second);
-    // }
-    // cout<<endl;
-
-    ll lc = 1;
+    ll lc = 1;    
     for(auto it:v){
         lc = lcm(lc,it);
+        if(lc > 1e9){
+            cout<<n<<endl;return;
+        }
+        s.insert(it);
     }
+
     if(s.find(lc) == s.end()){
         cout<<n<<endl;return;
     }
-    // cout<<lc<<endl;
-    ll ans = (n-mp[1]-mp[lc]),dk = 2005;
-    ll mv = 0;
-    for(auto it:dependency[lc]){
-        if(dependency[it].size() == 0){
-            // mv += mp[it];
-        }else{
-            dk = min(dk,dfs(it));
+
+    // Iterate for other possible LCMs which will be guarenteed factor of lc!
+    for(ll div = 1;div*div<=lc;++div){
+        if(lc%div == 0){
+            check(div);
+            check(lc/div);
         }
-    }
-    cout<<ans<<endl;
-    cout<<dk<<endl;
-    // cout<<mv<<endl;
-    ans -= dk;
-    ans += mv;
-    // cout<<ans<<endl;
-    if(ans){
-        ans += mp[1];
     }
     cout<<ans<<endl;
 }
